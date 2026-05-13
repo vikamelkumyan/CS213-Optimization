@@ -1,8 +1,9 @@
-"""Newton's Method implementation for the quadratic objective."""
+"""Quadratic Newton wrapper used in the verification task."""
 
 import numpy as np
 
 from functions import quadratic_function, quadratic_gradient, quadratic_hessian
+from optimizers import newton_armijo
 
 
 def newton_method(
@@ -12,36 +13,13 @@ def newton_method(
     max_iter: int = 100,
     tol: float = 1e-6,
 ) -> dict:
-    """Run Newton's Method and return final state plus iteration history."""
-    x = x0.astype(float).copy()
-    H = quadratic_hessian(Q)
-
-    history = {
-        "x": [x.copy()],
-        "f": [],
-        "grad_norm": [],
-    }
-
-    for _ in range(max_iter):
-        grad = quadratic_gradient(x, Q, b)
-        grad_norm = np.linalg.norm(grad)
-        fx = quadratic_function(x, Q, b)
-
-        history["f"].append(fx)
-        history["grad_norm"].append(grad_norm)
-
-        if grad_norm < tol:
-            break
-
-        # Solve H p = grad, then use x_{k+1} = x_k - p.
-        step = np.linalg.solve(H, grad)
-        x = x - step
-        history["x"].append(x.copy())
-
-    return {
-        "x": x,
-        "f": quadratic_function(x, Q, b),
-        "grad_norm": np.linalg.norm(quadratic_gradient(x, Q, b)),
-        "iterations": len(history["grad_norm"]),
-        "history": history,
-    }
+    """Run Newton's Method on f(x)=x^TQx-b^Tx using numpy.linalg.solve."""
+    return newton_armijo(
+        f=lambda z: quadratic_function(z, Q, b),
+        grad_f=lambda z: quadratic_gradient(z, Q, b),
+        hess_f=lambda _: quadratic_hessian(Q),
+        x0=x0,
+        max_iter=max_iter,
+        tol=tol,
+        use_line_search=False,
+    )
