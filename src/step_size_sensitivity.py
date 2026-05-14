@@ -48,26 +48,48 @@ def save_results_csv(results: list[dict], output_path: Path) -> None:
 
 
 def create_gradient_norm_plot(results: list[dict], output_path: Path) -> None:
-    """Plot log gradient norms for every fixed step size."""
+    """Plot fixed-step behavior with stable and divergent runs separated."""
     eps = 1e-16
+    stable_results = [result for result in results if result["status"] != "diverged"]
+    divergent_results = [result for result in results if result["status"] == "diverged"]
 
-    plt.figure(figsize=(9, 5))
-    for result in results:
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+
+    for result in stable_results:
         grad_norms = np.array(result["history"]["grad_norm"])
         log_grad_norms = np.log(np.maximum(grad_norms, eps))
-        plt.plot(
+        axes[0].plot(
             np.arange(len(log_grad_norms)),
             log_grad_norms,
             linewidth=2,
             label=f"alpha={result['alpha']:g} ({result['status']})",
         )
 
-    plt.xlabel("Iteration")
-    plt.ylabel("log(||grad f(x^k)||)")
-    plt.title("Rosenbrock Fixed Step Size Sensitivity")
-    plt.grid(True, linestyle="--", alpha=0.4)
-    plt.legend()
-    plt.tight_layout()
+    axes[0].set_title("Stable but Slow Fixed Steps")
+    axes[0].set_xlabel("Iteration")
+    axes[0].set_ylabel("log(||grad f(x^k)||)")
+    axes[0].grid(True, linestyle="--", alpha=0.4)
+    axes[0].legend()
+
+    for result in divergent_results:
+        grad_norms = np.array(result["history"]["grad_norm"])
+        log_grad_norms = np.log(np.maximum(grad_norms, eps))
+        axes[1].plot(
+            np.arange(len(log_grad_norms)),
+            log_grad_norms,
+            marker="o",
+            linewidth=2,
+            label=f"alpha={result['alpha']:g} ({result['status']})",
+        )
+
+    axes[1].set_title("Large Steps Diverge Quickly")
+    axes[1].set_xlabel("Iteration")
+    axes[1].set_ylabel("log(||grad f(x^k)||)")
+    axes[1].grid(True, linestyle="--", alpha=0.4)
+    axes[1].legend()
+
+    fig.suptitle("Rosenbrock Fixed Step Size Sensitivity")
+    fig.tight_layout(rect=[0, 0, 1, 0.94])
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     plt.savefig(output_path, dpi=150)

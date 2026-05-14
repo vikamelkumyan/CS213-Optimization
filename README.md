@@ -8,7 +8,7 @@ The project satisfies the five required tasks:
 
 1. Implement Gradient Descent and Newton's Method from scratch.
 2. Study the effect of condition number on convergence.
-3. Visualize Rosenbrock optimization paths and log-gradient convergence.
+3. Visualize Rosenbrock optimization paths and log-gradient convergence for GD, Newton, and BFGS.
 4. Compare against `scipy.optimize.minimize(method="BFGS")`.
 5. Study fixed step-size sensitivity on Rosenbrock.
 
@@ -94,6 +94,8 @@ Rosenbrock comparison from `(-1.2, 1)`:
 | Gradient Descent | 13757 | 9.83e-07 |
 | Newton | 22 | 4.47e-10 |
 | SciPy BFGS | 33 | 2.59e-08 |
+
+The Rosenbrock path and gradient-norm plots include BFGS alongside GD and Newton.
 
 Fixed-step Gradient Descent on Rosenbrock:
 

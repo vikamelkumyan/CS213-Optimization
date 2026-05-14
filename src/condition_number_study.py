@@ -54,16 +54,33 @@ def create_plot(results: list[dict], output_path: Path) -> None:
     gd_iters = [row["gd_iters"] for row in results]
     newton_iters = [row["newton_iters"] for row in results]
 
-    plt.figure(figsize=(8, 5))
-    plt.plot(kappas, gd_iters, marker="o", linewidth=2, label="Gradient Descent")
-    plt.plot(kappas, newton_iters, marker="s", linewidth=2, label="Newton's Method")
-    plt.xscale("log")
-    plt.xlabel("Condition Number kappa(Q)")
-    plt.ylabel("Iterations to reach tolerance")
-    plt.title("Effect of Condition Number on Convergence")
-    plt.grid(True, which="both", linestyle="--", alpha=0.4)
-    plt.legend()
-    plt.tight_layout()
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+
+    for axis in axes:
+        axis.plot(kappas, gd_iters, marker="o", linewidth=2, label="Gradient Descent")
+        axis.plot(kappas, newton_iters, marker="s", linewidth=2, label="Newton's Method")
+        axis.set_xscale("log")
+        axis.set_xlabel("Condition Number kappa(Q)")
+        axis.set_ylabel("Iterations to reach tolerance")
+        axis.grid(True, which="both", linestyle="--", alpha=0.4)
+        axis.legend()
+
+        for kappa, gd_iter, newton_iter in zip(kappas, gd_iters, newton_iters):
+            axis.annotate(f"{gd_iter}", (kappa, gd_iter), textcoords="offset points", xytext=(0, 8), ha="center")
+            axis.annotate(
+                f"{newton_iter}",
+                (kappa, newton_iter),
+                textcoords="offset points",
+                xytext=(0, -14),
+                ha="center",
+            )
+
+    axes[0].set_title("Linear Iteration Scale")
+    axes[1].set_title("Log Iteration Scale")
+    axes[1].set_yscale("log")
+
+    fig.suptitle("Effect of Condition Number on Convergence")
+    fig.tight_layout(rect=[0, 0, 1, 0.94])
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     plt.savefig(output_path, dpi=150)

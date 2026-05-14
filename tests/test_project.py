@@ -63,6 +63,8 @@ class ProjectExperimentsTest(unittest.TestCase):
         self.assertTrue(result["success"])
         self.assertLess(result["grad_norm"], 1e-6)
         self.assertLess(result["iterations"], 100)
+        self.assertGreater(len(result["history"]["x"]), 1)
+        self.assertEqual(len(result["history"]["x"]), len(result["history"]["grad_norm"]))
 
     def test_fixed_large_step_diverges_on_rosenbrock(self) -> None:
         result = fixed_step_gradient_descent(

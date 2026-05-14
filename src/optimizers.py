@@ -193,22 +193,37 @@ def scipy_bfgs(
     tol: float = 1e-6,
     max_iter: int = 20000,
 ) -> dict:
-    """Run scipy.optimize.minimize with method='BFGS'."""
+    """Run scipy.optimize.minimize with method='BFGS' and record iterate history."""
+    x_start = x0.astype(float).copy()
+    history = make_history(x_start)
+    history["f"].append(f(x_start))
+    history["grad_norm"].append(float(np.linalg.norm(grad_f(x_start))))
+
+    def record_iteration(xk: Array) -> None:
+        point = xk.copy()
+        history["x"].append(point)
+        history["f"].append(f(point))
+        history["grad_norm"].append(float(np.linalg.norm(grad_f(point))))
+
     scipy_result = minimize(
         fun=f,
-        x0=x0,
+        x0=x_start,
         jac=grad_f,
         method="BFGS",
+        callback=record_iteration,
         options={"gtol": tol, "maxiter": max_iter},
     )
 
     x = scipy_result.x
+    if not np.allclose(history["x"][-1], x):
+        record_iteration(x)
+
     return {
         "x": x,
         "f": f(x),
         "grad_norm": float(np.linalg.norm(grad_f(x))),
         "iterations": int(scipy_result.nit),
-        "history": {},
+        "history": history,
         "status": "converged" if scipy_result.success else "failed",
         "success": bool(scipy_result.success),
         "message": str(scipy_result.message),

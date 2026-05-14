@@ -31,7 +31,9 @@ H_k p_k = grad f(x_k),    x_{k+1} = x_k - p_k.
 
 For the Rosenbrock function, Armijo globalization is used with Newton's Method
 to improve robustness away from the minimizer. SciPy BFGS was run with
-`scipy.optimize.minimize(method="BFGS")` and the analytic gradient.
+`scipy.optimize.minimize(method="BFGS")` and the analytic gradient. Its callback
+history is recorded so BFGS can be compared visually, not only in a summary
+table.
 
 The stopping tolerance for all main convergence experiments was
 `||grad f(x_k)|| < 1e-6`.
@@ -84,7 +86,8 @@ on these quadratics.
 
 ### Task 3: Rosenbrock Visualization
 
-The Rosenbrock function was minimized from `x0 = (-1.2, 1)`:
+The Rosenbrock function was minimized from `x0 = (-1.2, 1)` using Gradient
+Descent, Newton's Method, and SciPy BFGS:
 
 ```text
 f(x, y) = (1 - x)^2 + 100(y - x^2)^2.
@@ -95,14 +98,24 @@ The Hessian condition number at the minimizer `(1, 1)` is approximately
 
 ![Rosenbrock Paths](../results/rosenbrock_paths.png)
 
-Gradient Descent follows the valley slowly. Newton's Method uses curvature
-information and moves to the minimizer in far fewer iterations.
+The path figure has three views: a full overview, a valley zoom, and a separate
+Gradient Descent early-iteration view. The early GD panel shows that the
+apparently straight segment in the overview is not a plotting bug; it is a large
+Armijo-accepted step after several small zig-zagging moves. Gradient Descent then
+follows the valley slowly. Newton's Method uses exact curvature information and
+moves to the minimizer in far fewer iterations. BFGS follows a Newton-like route
+after building an inverse-Hessian approximation from previous steps and
+gradients.
 
 ![Rosenbrock Gradient Norms](../results/rosenbrock_gradient_norms.png)
 
-The log-gradient plot shows the main convergence phases. Gradient Descent has a
-long linear phase. Newton has a short global phase followed by rapid local
-convergence near the minimizer.
+The log-gradient plot shows the main convergence phases for all three methods.
+The left panel shows the full run, while the right panel zooms into the first
+60 iterations so Newton and BFGS are visible despite Gradient Descent's much
+longer run. Gradient Descent has a long linear phase. Newton has a short global
+phase followed by rapid local convergence near the minimizer. BFGS sits between
+them: it needs more iterations than exact Newton, but its gradient norm drops
+far faster than Gradient Descent.
 
 ### Task 4: BFGS via SciPy
 
@@ -113,15 +126,18 @@ iteration counts are the more stable comparison.
 
 | Method | Iterations | Runtime seconds | Final f | Final \|\|grad\|\| |
 |---|---:|---:|---:|---:|
-| Gradient Descent | 13757 | 0.2176 | 6.12e-13 | 9.83e-07 |
+| Gradient Descent | 13757 | 0.2085 | 6.12e-13 | 9.83e-07 |
 | Newton | 22 | 0.0003 | 3.74e-21 | 4.47e-10 |
 | SciPy BFGS | 33 | 0.0015 | 8.98e-19 | 2.59e-08 |
 
 ![BFGS Comparison](../results/bfgs_comparison.png)
 
-BFGS needed more iterations than exact Newton, but far fewer than Gradient
-Descent. This matches the expected role of BFGS: it builds curvature information
-without using the exact Hessian at every iteration.
+The comparison plot uses log-scale panels because Gradient Descent is orders of
+magnitude slower than Newton and BFGS. A separate Newton-vs-BFGS panel keeps the
+most important quasi-Newton comparison visible. BFGS needed more iterations than
+exact Newton, but far fewer than Gradient Descent. This matches the expected
+role of BFGS: it builds curvature information without using the exact Hessian at
+every iteration.
 
 ### Task 5: Step Size Sensitivity
 

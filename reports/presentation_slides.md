@@ -142,7 +142,7 @@ x0 = (-1.2, 1)
 
 ![Rosenbrock Paths](../results/rosenbrock_paths.png)
 
-Gradient Descent follows the curved valley slowly. Newton's Method takes a shorter path because the Hessian tells it how the objective bends.
+The plot now shows all three methods. The first panel is the full overview, the second panel zooms into the valley, and the third panel shows the first 40 Gradient Descent iterations. The long GD segment is not a bug; it is a large Armijo-accepted step after early zig-zagging. Newton and BFGS take shorter curvature-aware paths.
 
 ---
 
@@ -156,7 +156,9 @@ The vertical axis is:
 log(||grad f(x_k)||)
 ```
 
-Gradient Descent has a long linear convergence phase. Newton's Method has a short initial phase and then rapid local convergence near the minimizer.
+Gradient Descent has a long linear convergence phase. Newton's Method has a short initial phase and then rapid local convergence near the minimizer. BFGS appears between them: it is not exact Newton, but it reduces the gradient norm much faster than Gradient Descent.
+
+The right panel zooms into the first 60 iterations so the BFGS and Newton behavior is visible instead of being compressed by the long Gradient Descent run.
 
 ---
 
@@ -168,7 +170,7 @@ On Rosenbrock from `(-1.2, 1)`:
 
 | Method | Iterations | Runtime Seconds | Final \|\|grad\|\| |
 |---|---:|---:|---:|
-| Gradient Descent | 13757 | 0.2176 | 9.83e-07 |
+| Gradient Descent | 13757 | 0.2085 | 9.83e-07 |
 | Newton's Method | 22 | 0.0003 | 4.47e-10 |
 | SciPy BFGS | 33 | 0.0015 | 2.59e-08 |
 
@@ -181,6 +183,8 @@ BFGS needed more iterations than exact Newton, but it was much closer to Newton 
 ![BFGS Comparison](../results/bfgs_comparison.png)
 
 The plot makes the difference clear: Gradient Descent requires thousands of iterations, while Newton and BFGS converge in a few dozen iterations.
+
+The log-scale panels make all three methods visible, and the Newton-vs-BFGS zoom shows the main quasi-Newton comparison directly.
 
 BFGS is practically attractive because it gets curvature-like behavior without explicitly computing the exact Hessian.
 
@@ -251,4 +255,3 @@ reports/presentation_slides.md
 results/*.png
 results/*.csv
 ```
-
